@@ -1,0 +1,38 @@
+.parrent {
+    position: absolute; 
+    top: 50px; 
+    width: 800px; 
+    height: 600px; 
+    overflow: hidden; 
+}
+
+.par {
+    left: 0px;
+    border: solid red 1px;
+}
+
+.prev {
+    display:inline-block;
+    left: 850px;
+    border: solid black 1px;
+}
+
+.cont {
+    position: relative; 
+    /* transition: all 0.2s; */
+}
+
+.img {
+    -webkit-user-select: none;
+       -moz-user-select: none;
+        -ms-user-select: none;
+            user-select: none;
+    position:absolute;
+    z-index:1;
+}
+
+.canv {
+    position:relative;
+    z-index:20;
+}
+
