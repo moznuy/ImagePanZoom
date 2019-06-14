@@ -21,19 +21,23 @@ class Rectangle {
         this.begx = x;
         this.begy = y;
     }
-    scale(m_x, m_y, plus) {
-        // if (m_x > x && m_x < x + this.width && m_y > y && m_y < y + this.height)
+    scale(m_x, m_y, plus, scale) {
+
+        if (!(m_x > this.x && m_x < this.x + this.width && m_y > this.y && m_y < this.y + this.height)) {
+            m_x = this.x + this.width / 2;
+            m_y = this.y + this.height / 2;
+        }
         const left = this.x, top = this.y, right = this.x + this.width, bottom = this.y + this.height;
         const lt = new Vec(left - m_x, top - m_y);
-        /** @type {Vec} */
 
         const coeff = plus === true ? 1.1 : 1 / 1.1;
 
         const nw_lt = lt.multiplyBy(coeff);
         this.x = m_x + nw_lt.x;
         this.y = m_y + nw_lt.y;
-        this.width *= coeff;
-        this.height *= coeff;
+        console.log(scale);
+        this.width = 800 / scale;
+        this.height = 600 / scale;
     }
     // scale_inside()
 }
@@ -138,8 +142,14 @@ prev.addEventListener("mousemove", e => {
 
 let Draw = function () {
     drawPreview();
-    tran_origin(center.x, center.y);
-    trans(800 / myAwesomeRect.width, 0, 0);
+    if (Math.abs(scale - 1.0) > 1e-3) {
+        tran_origin(center.x, center.y);
+        trans(scale, 0, 0);
+    }
+    else {
+        tran_origin(0, 0);
+        trans(1, myAwesomeRect.x, myAwesomeRect.y);
+    }
 }
 
 
@@ -158,7 +168,7 @@ prev.addEventListener("wheel", e => {
     let m_x = e.clientX - prev_rect.left;
     let m_y = e.clientY - prev_rect.top;
 
-    myAwesomeRect.scale(m_x, m_y, Math.sign(e.deltaY) > 0)
+    myAwesomeRect.scale(m_x, m_y, Math.sign(e.deltaY) > 0, scale)
     Draw();
 });
 
@@ -188,7 +198,8 @@ let drawPreview = function () {
     let den = ad.x * bd.y - ad.y * bd.x;
     u = (as.y * bd.x + bd.y * bs.x - bs.y * bd.x - bd.y * as.x) / den;
 
-    center = new Vec(as.x + ad.x * u, as.y + ad.y * u);
+    if (Math.abs(u) < 1e6)
+        center = new Vec(as.x + ad.x * u, as.y + ad.y * u);
 
     ctx.beginPath();
     ctx.rect(0, 0, 800, 600);
@@ -203,19 +214,40 @@ let drawPreview = function () {
     ctx.stroke();
     ctx.closePath();
 
-    ctx.beginPath();
-    ctx.moveTo(as.x, as.y);
-    ctx.lineTo(center.x, center.y);
-    ctx.moveTo(bs.x, bs.y);
-    ctx.lineTo(center.x, center.y);
+    if (Math.abs(u) < 1e6) {
+        ctx.strokeStyle = "rgba(0, 255, 0, 0.5)";
+        ctx.beginPath();
+        ctx.moveTo(as.x, as.y);
+        ctx.lineTo(myAwesomeRect.x, myAwesomeRect.y);
+        ctx.moveTo(bs.x, bs.y);
+        ctx.lineTo(myAwesomeRect.x, myAwesomeRect.y + myAwesomeRect.height);
+        ctx.moveTo(as.x + 800, as.y);
+        ctx.lineTo(myAwesomeRect.x + myAwesomeRect.width, myAwesomeRect.y);
+        ctx.moveTo(bs.x + 800, bs.y);
+        ctx.lineTo(myAwesomeRect.x + myAwesomeRect.width, myAwesomeRect.y + myAwesomeRect.height);
+        ctx.setLineDash([5, 3]);
+        ctx.stroke();
+        ctx.closePath();
 
-    ctx.moveTo(as.x + 800, as.y);
-    ctx.lineTo(center.x, center.y);
-    ctx.moveTo(bs.x + 800, bs.y);
-    ctx.lineTo(center.x, center.y);
-    ctx.setLineDash([5, 3]);
-    ctx.stroke();
-    ctx.closePath();
+        ctx.beginPath();
+        ctx.strokeStyle = "rgba(0, 0, 255, 0.5)";
+        ctx.moveTo(myAwesomeRect.x, myAwesomeRect.y);
+        ctx.lineTo(center.x, center.y);
+        ctx.moveTo(myAwesomeRect.x, myAwesomeRect.y + myAwesomeRect.height);
+        ctx.lineTo(center.x, center.y);
+        ctx.moveTo(myAwesomeRect.x + myAwesomeRect.width, myAwesomeRect.y);
+        ctx.lineTo(center.x, center.y);
+        ctx.moveTo(myAwesomeRect.x + myAwesomeRect.width, myAwesomeRect.y + myAwesomeRect.height);
+        ctx.lineTo(center.x, center.y);
+        ctx.stroke();
+        ctx.closePath();
+
+        ctx.beginPath();
+        ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
+        ctx.arc(center.x, center.y, 2, 0, 360, true);
+        ctx.fill();
+        ctx.closePath();
+    }
 
     ctx.setLineDash([]);
 }
